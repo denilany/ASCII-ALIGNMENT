@@ -33,7 +33,6 @@ func AsciiValue() string {
 
 	bannerSlice, err := ReadAscii(banner)
 	if err != nil {
-		// fmt.Println("Error loading banner:", err)
 		return "Error loading banner: " + err.Error()
 	}
 

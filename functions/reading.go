@@ -3,7 +3,6 @@ package functions
 import (
 	"bufio"
 	"errors"
-	"fmt"
 	"io"
 	"os"
 	"strings"
@@ -30,7 +29,6 @@ func ReadAscii(banner string) ([]string, error) {
 	fileHash := checkBanner(byteSlice)
 
 	bannerFile := banner[strings.LastIndex(banner, "/")+1:]
-	fmt.Println(bannerFile)
 
 	switch bannerFile {
 	case "standard.txt":
