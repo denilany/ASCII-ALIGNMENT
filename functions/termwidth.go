@@ -12,12 +12,12 @@ type Winsize struct {
 	Ypixel uint16
 }
 
+// This function retrieves the terminal size
 func getTerminalSize() (int, int, error) {
 	ws := &Winsize{}
-	// TIOCGWINSZ is the ioctl request code to get terminal window size
 	_, _, err := syscall.Syscall(syscall.SYS_IOCTL,
-		uintptr(syscall.Stdin),
-		uintptr(syscall.TIOCGWINSZ),
+		uintptr(syscall.Stdin),  // The file descriptor for standard input
+		uintptr(syscall.TIOCGWINSZ),  // TIOCGWINSZ is the ioctl request code to get terminal window size
 		uintptr(unsafe.Pointer(ws)),
 	)
 	if err != 0 {
