@@ -6,19 +6,10 @@ import (
 )
 
 const (
-	asciiHeight = 8
+	asciiHeight int = 8
 )
 
-type Alignment int
-
-const (
-	Left Alignment = iota
-	Center
-	Right
-	Justify
-)
-
-func AsciiArt(bannerSlice []string, input string, alignment Alignment, termWidth int) (string, error) {
+func asciiArt(bannerSlice []string, input string, alignment Alignment, termWidth int) (string, error) {
 	var result strings.Builder
 
 	input = replaceUnprint(input)

@@ -6,6 +6,15 @@ import (
 	"strings"
 )
 
+type Alignment int
+
+const (
+	Left Alignment = iota
+	Center
+	Right
+	Justify
+)
+
 func AsciiValue() string {
 	var alignment Alignment
 	var input, banner string
@@ -25,7 +34,6 @@ func AsciiValue() string {
 				PrintUsage()
 				return ""
 			}
-
 		}
 	}
 	input = os.Args[2]
@@ -40,7 +48,7 @@ func AsciiValue() string {
 	if err != nil {
 		return err.Error()
 	}
-	result, err := AsciiArt(bannerSlice, input, alignment, termWidth)
+	result, err := asciiArt(bannerSlice, input, alignment, termWidth)
 	if err != nil {
 		fmt.Println("Error: ", err)
 	}
