@@ -1,45 +1,91 @@
 package functions
 
-import "strings"
+import (
+	"fmt"
+	"strings"
+)
 
-func alignLine(line string, alignment Alignment, termWidth int) string {
-	lineWidth := len(line)
-	if lineWidth >= termWidth {
-		return line[:termWidth]
+const asciiHeight = 8
+
+// printAsciiArt prints ASCII art with specified alignment and width
+func printAsciiArt(text string, asciiArtMap map[rune]string, alignment string, termWidth int) {
+	if text == "" {
+		return
 	}
 
-	switch alignment {
-	case Left:
-		return line + strings.Repeat(" ", termWidth-lineWidth)
-	case Right:
-		return strings.Repeat(" ", termWidth-lineWidth) + line
-	case Center:
-		leftPad := (termWidth - lineWidth) / 2
-		rightPad := termWidth - lineWidth - leftPad
-		return strings.Repeat(" ", leftPad) + line + strings.Repeat(" ", rightPad)
-	case Justify:
-		if lineWidth == termWidth {
-			return line
+	if containsSpecialCharacters(text) {
+		return
+	}
+
+	asciiArtLines := [asciiHeight]string{}
+	spacePositions := []int{}
+	totalTextWidth := 0
+
+	for _, char := range text {
+		art, exists := asciiArtMap[char]
+		if !exists {
+			fmt.Println("Character not found in ASCII art map")
+			return
 		}
-		words := strings.Fields(line)
-		if len(words) == 1 {
-			return line + strings.Repeat(" ", termWidth-lineWidth)
-		}
-		spaces := termWidth - lineWidth + len(words) - 1
-		spacePerGap := spaces / (len(words) - 1)
-		extraSpaces := spaces % (len(words) - 1)
-		var justifiedLine strings.Builder
-		for i, word := range words {
-			justifiedLine.WriteString(word)
-			if i < len(words)-1 {
-				justifiedLine.WriteString(strings.Repeat(" ", spacePerGap))
-				if i < extraSpaces {
-					justifiedLine.WriteString(" ")
-				}
+
+		lines := strings.Split(art, "\n")
+		for i := 0; i < asciiHeight; i++ {
+			if i < len(lines) {
+				asciiArtLines[i] += lines[i]
+			} else {
+				asciiArtLines[i] += strings.Repeat(" ", len(lines[0]))
 			}
 		}
-		return justifiedLine.String()
-	default:
-		return line
+
+		if char == ' ' {
+			spacePositions = append(spacePositions, totalTextWidth)
+		}
+
+		totalTextWidth += len(lines[0])
+	}
+
+	applyTextAlignment(asciiArtLines[:], alignment, termWidth, totalTextWidth, spacePositions)
+
+	for _, line := range asciiArtLines {
+		fmt.Println(line)
+	}
+}
+
+// applyTextAlignment aligns the ASCII art lines based on the specified alignment
+func applyTextAlignment(lines []string, alignment string, termWidth, totalTextWidth int, spacePositions []int) {
+	switch alignment {
+	case "center":
+		padding := (termWidth - totalTextWidth) / 2
+		for i := range lines {
+			lines[i] = strings.Repeat(" ", padding) + lines[i]
+		}
+	case "right":
+		padding := termWidth - totalTextWidth
+		for i := range lines {
+			lines[i] = strings.Repeat(" ", padding) + lines[i]
+		}
+	case "left":
+		// No additional padding needed for left alignment
+	case "justify":
+		if totalTextWidth < termWidth && len(spacePositions) > 0 {
+			extraSpaces := termWidth - totalTextWidth
+			spacesToAdd := extraSpaces / len(spacePositions)
+			remainder := extraSpaces % len(spacePositions)
+
+			for i := range lines {
+				newLine := []rune(lines[i])
+				offset := 0
+				for j, pos := range spacePositions {
+					additionalSpaces := spacesToAdd
+					if j < remainder {
+						additionalSpaces++
+					}
+					adjustedPos := pos + offset
+					newLine = append(newLine[:adjustedPos], append([]rune(strings.Repeat(" ", additionalSpaces)), newLine[adjustedPos:]...)...)
+					offset += additionalSpaces
+				}
+				lines[i] = string(newLine)
+			}
+		}
 	}
 }

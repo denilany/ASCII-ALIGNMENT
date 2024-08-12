@@ -6,30 +6,21 @@ import (
 	"strings"
 )
 
-type Alignment int
-
-const (
-	Left Alignment = iota
-	Center
-	Right
-	Justify
-)
-
 func AsciiValue() string {
-	var alignment Alignment
-	var input, banner string
+	var alignment string
+	var input, bannerPath string
 
 	for _, arg := range os.Args[1:] {
 		if strings.HasPrefix(arg, "--align=") {
 			switch strings.TrimPrefix(arg, "--align=") {
 			case "left":
-				alignment = Left
+				alignment = "left"
 			case "right":
-				alignment = Right
+				alignment = "right"
 			case "center":
-				alignment = Center
+				alignment = "center"
 			case "justify":
-				alignment = Justify
+				alignment = "justify"
 			default:
 				PrintUsage()
 				return ""
@@ -37,9 +28,9 @@ func AsciiValue() string {
 		}
 	}
 	input = os.Args[2]
-	banner = "banner/" + os.Args[3] + ".txt"
+	bannerPath = "banner/" + os.Args[3] + ".txt"
 
-	bannerSlice, err := ReadAscii(banner)
+	bannerMap, err := ReadAsciiArt(bannerPath)
 	if err != nil {
 		return "Error loading banner: " + err.Error()
 	}
@@ -48,12 +39,10 @@ func AsciiValue() string {
 	if err != nil {
 		return err.Error()
 	}
-	result, err := asciiArt(bannerSlice, input, alignment, termWidth)
-	if err != nil {
-		fmt.Println("Error: ", err)
-	}
 
-	return result
+	printAsciiArt(input, bannerMap, alignment, termWidth)
+
+	return ""
 }
 
 func PrintUsage() {
