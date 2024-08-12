@@ -71,7 +71,7 @@ func validateBannerFile(filePath string, content []byte) error {
 func parseAsciiArt(content []byte) (map[rune]string, error) {
     scanner := bufio.NewScanner(strings.NewReader(string(content)))
     asciiArtMap := make(map[rune]string)
-    currentChar := ' ' // Start with space
+    currentChar := ' ' 
     var currentArtBuilder strings.Builder
     lineCount := 0
 
@@ -87,7 +87,6 @@ func parseAsciiArt(content []byte) (map[rune]string, error) {
         }
 
         if line == "" {
-            // Skip empty lines
             continue
         }
 
@@ -95,7 +94,7 @@ func parseAsciiArt(content []byte) (map[rune]string, error) {
         lineCount++
     }
 
-    // Add the last ASCII art (should be for '~')
+   
     if lineCount == asciiArtHeight {
         asciiArtMap[currentChar] = currentArtBuilder.String()
     }
