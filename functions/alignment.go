@@ -5,10 +5,7 @@ import (
 	"strings"
 )
 
-const asciiHeight = 8
-
-// printAsciiArt prints ASCII art with specified alignment and width
-func printAsciiArt(text string, asciiArtMap map[rune]string, alignment string, termWidth int) {
+func printAsciiArt(text string, asciiArtMap map[rune]string, alignment string, outputWidth int) {
 	if text == "" {
 		return
 	}
@@ -17,7 +14,7 @@ func printAsciiArt(text string, asciiArtMap map[rune]string, alignment string, t
 		return
 	}
 
-	asciiArtLines := [asciiHeight]string{}
+	asciiArtLines := [asciiArtHeight]string{}
 	spacePositions := []int{}
 	totalTextWidth := 0
 
@@ -29,7 +26,7 @@ func printAsciiArt(text string, asciiArtMap map[rune]string, alignment string, t
 		}
 
 		lines := strings.Split(art, "\n")
-		for i := 0; i < asciiHeight; i++ {
+		for i := 0; i < asciiArtHeight; i++ {
 			if i < len(lines) {
 				asciiArtLines[i] += lines[i]
 			} else {
@@ -44,36 +41,37 @@ func printAsciiArt(text string, asciiArtMap map[rune]string, alignment string, t
 		totalTextWidth += len(lines[0])
 	}
 
-	applyTextAlignment(asciiArtLines[:], alignment, termWidth, totalTextWidth, spacePositions)
+	alignedString := applyTextAlignment(asciiArtLines[:], alignment, outputWidth, totalTextWidth, spacePositions)
 
-	for _, line := range asciiArtLines {
-		fmt.Println(line)
-	}
+	fmt.Println(alignedString)
 }
 
 // applyTextAlignment aligns the ASCII art lines based on the specified alignment
-func applyTextAlignment(lines []string, alignment string, termWidth, totalTextWidth int, spacePositions []int) {
+// and returns a single aligned string
+func applyTextAlignment(lines []string, alignment string, termWidth, totalTextWidth int, spacePositions []int) string {
+	var alignedLines []string
+
 	switch alignment {
+	case "left":
+		alignedLines = lines
 	case "center":
-		padding := (termWidth - totalTextWidth) / 2
-		for i := range lines {
-			lines[i] = strings.Repeat(" ", padding) + lines[i]
+		leftPadding := (termWidth - totalTextWidth) / 2
+		for _, line := range lines {
+			alignedLines = append(alignedLines, strings.Repeat(" ", leftPadding)+line)
 		}
 	case "right":
-		padding := termWidth - totalTextWidth
-		for i := range lines {
-			lines[i] = strings.Repeat(" ", padding) + lines[i]
+		leftPadding := termWidth - totalTextWidth
+		for _, line := range lines {
+			alignedLines = append(alignedLines, strings.Repeat(" ", leftPadding)+line)
 		}
-	case "left":
-		// No additional padding needed for left alignment
 	case "justify":
 		if totalTextWidth < termWidth && len(spacePositions) > 0 {
 			extraSpaces := termWidth - totalTextWidth
 			spacesToAdd := extraSpaces / len(spacePositions)
 			remainder := extraSpaces % len(spacePositions)
 
-			for i := range lines {
-				newLine := []rune(lines[i])
+			for _, line := range lines {
+				newLine := []rune(line)
 				offset := 0
 				for j, pos := range spacePositions {
 					additionalSpaces := spacesToAdd
@@ -84,8 +82,12 @@ func applyTextAlignment(lines []string, alignment string, termWidth, totalTextWi
 					newLine = append(newLine[:adjustedPos], append([]rune(strings.Repeat(" ", additionalSpaces)), newLine[adjustedPos:]...)...)
 					offset += additionalSpaces
 				}
-				lines[i] = string(newLine)
+				alignedLines = append(alignedLines, string(newLine))
 			}
+		} else {
+			alignedLines = lines
 		}
 	}
+
+	return strings.Join(alignedLines, "\n")
 }
