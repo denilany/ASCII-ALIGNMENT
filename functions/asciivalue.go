@@ -15,9 +15,6 @@ type Arguments struct {
 func ParseArguments() (Arguments, error) {
 	args := Arguments{}
 
-	if len(os.Args) < 2 {
-		return args, fmt.Errorf(PrintUsage())
-	}
 	cmdArgs := os.Args[1:]
 
 	if len(cmdArgs) == 1 {
@@ -82,6 +79,8 @@ func AsciiValue() string {
 	return ""
 }
 
-func PrintUsage() string {
-	return "Usage go run . [OPTION] [STRING] [BANNER]" + "\n" + "Example: go run . --align=right something standard"
+func PrintUsage() {
+	fmt.Println("Usage go run . [OPTION] [STRING] [BANNER]")
+	fmt.Println()
+	fmt.Println("Example: go run . --align=right something standard")
 }
