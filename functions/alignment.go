@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func printAsciiArt(text string, asciiArtMap map[rune]string, alignment string, outputWidth int) {
+func printAsciiArt(text string, asciiArtMap map[rune]string, alignment string, termWidth int) {
 	if text == "" {
 		return
 	}
@@ -41,7 +41,7 @@ func printAsciiArt(text string, asciiArtMap map[rune]string, alignment string, o
 		totalTextWidth += len(lines[0])
 	}
 
-	alignedString := applyTextAlignment(asciiArtLines[:], alignment, outputWidth, totalTextWidth, spacePositions)
+	alignedString := applyTextAlignment(asciiArtLines[:], alignment, termWidth, totalTextWidth, spacePositions)
 
 	fmt.Println(alignedString)
 }

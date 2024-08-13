@@ -6,30 +6,68 @@ import (
 	"strings"
 )
 
-func AsciiValue() string {
-	var alignment string
-	var input, bannerPath string
+type Arguments struct {
+	input  string
+	flag   []string
+	banner string
+}
 
-	for _, arg := range os.Args[1:] {
+func ParseArguments() (Arguments, error) {
+	args := Arguments{}
+
+	if len(os.Args) < 2 {
+		return args, fmt.Errorf(PrintUsage())
+	}
+	cmdArgs := os.Args[1:]
+
+	if len(cmdArgs) == 1 {
+		args.input = cmdArgs[0]
+		args.flag = append(args.flag, "left")
+		args.banner = "standard"
+		return args, nil
+	} else if len(cmdArgs) == 2 {
+		args.input = cmdArgs[0]
+		args.flag = append(args.flag, "left")
+		args.banner = cmdArgs[1]
+		return args, nil
+	}
+
+	for i, arg := range cmdArgs {
 		if strings.HasPrefix(arg, "--align=") {
-			switch strings.TrimPrefix(arg, "--align=") {
-			case "left":
-				alignment = "left"
-			case "right":
-				alignment = "right"
-			case "center":
-				alignment = "center"
-			case "justify":
-				alignment = "justify"
+			alignment := strings.TrimPrefix(arg, "--align=")
+			switch alignment {
+			case "left", "right", "center", "justify":
+				args.flag = append(args.flag, alignment)
 			default:
-				PrintUsage()
-				return ""
+				return args, fmt.Errorf("invalid alignment: %s", alignment)
 			}
+		} else if i == 1 {
+			args.input = arg
+		} else if i == 2 {
+			args.banner = arg
 		}
 	}
-	input = os.Args[2]
-	bannerPath = "banner/" + os.Args[3] + ".txt"
 
+	if args.input == "" || args.banner == "" {
+		return args, fmt.Errorf("missing input or banner")
+	}
+
+	return args, nil
+}
+
+func AsciiValue() string {
+	args, err := ParseArguments()
+	if err != nil {
+		PrintUsage()
+		return err.Error()
+	}
+
+	var alignment string
+	if len(args.flag) > 0 {
+		alignment = args.flag[0]
+	}
+
+	bannerPath := "banner/" + args.banner + ".txt"
 	bannerMap, err := ReadAsciiArt(bannerPath)
 	if err != nil {
 		return "Error loading banner: " + err.Error()
@@ -40,13 +78,10 @@ func AsciiValue() string {
 		return err.Error()
 	}
 
-	printAsciiArt(input, bannerMap, alignment, termWidth)
-
+	printAsciiArt(args.input, bannerMap, alignment, termWidth)
 	return ""
 }
 
-func PrintUsage() {
-	fmt.Println("Usage go run . [OPTION] [STRING] [BANNER]")
-	fmt.Println()
-	fmt.Println("Example: go run . --align=right something standard")
+func PrintUsage() string {
+	return "Usage go run . [OPTION] [STRING] [BANNER]" + "\n" + "Example: go run . --align=right something standard"
 }
