@@ -23,10 +23,24 @@ func ParseArguments() (Arguments, error) {
 		args.banner = "standard"
 		return args, nil
 	} else if len(cmdArgs) == 2 {
-		args.input = cmdArgs[0]
-		args.flag = append(args.flag, "left")
-		args.banner = cmdArgs[1]
-		return args, nil
+		if strings.Contains(cmdArgs[0], "--align=") {
+			alignment := strings.TrimPrefix(cmdArgs[0], "--align=")
+			switch alignment {
+			case "left", "right", "center", "justify":
+				args.flag = append(args.flag, alignment)
+			default:
+				return args, fmt.Errorf("invalid alignment: %s", alignment)
+			}
+			args.input = cmdArgs[1]
+
+			args.banner = "standard"
+			return args, nil
+		} else {
+			args.input = cmdArgs[0]
+			args.flag = append(args.flag, "left")
+			args.banner = cmdArgs[1]
+			return args, nil
+		}
 	}
 
 	for i, arg := range cmdArgs {
